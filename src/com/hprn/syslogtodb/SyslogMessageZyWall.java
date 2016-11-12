@@ -37,8 +37,12 @@ public class SyslogMessageZyWall implements SyslogMessageIF {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("separator: ").append(separator).append(": [");
+		int counter = 0;
 		for (String string : splittedMsg) {
-			sb.append(string).append(", ");
+			counter++;
+			sb.append(string);
+			if (counter < splittedMsg.length)
+				sb.append(",");
 		}
 		sb.append("]");
 		return sb.toString();
