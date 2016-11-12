@@ -1,4 +1,4 @@
-package com.hprn.syslogtodb;
+package com.hprn.syslogtodb.model;
 
 public class SyslogPriority {
 	
@@ -15,8 +15,14 @@ public class SyslogPriority {
 			throw new IllegalArgumentException("Priority value invalid");
 		facility = Integer.parseInt(prio.substring(0, 5), 2);
 		severty = Integer.parseInt(prio.substring(5, 8), 2);
-		System.out.println(facility);
-		System.out.println(severty);
 	}
-	
+
+	public int getFacility() {
+		return facility;
+	}
+
+	public int getSeverty() {
+		return severty;
+	}
+
 }
