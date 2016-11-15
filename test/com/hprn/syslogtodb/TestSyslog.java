@@ -3,6 +3,7 @@ package com.hprn.syslogtodb;
 import static org.junit.Assert.*;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
@@ -15,7 +16,7 @@ import com.hprn.syslogtodb.model.SyslogPriority;
 
 public class TestSyslog {
 
-	private static final String LOG_FILENAME = "message_example_zywall.txt";
+	private static final String LOG_FILENAME = "message_example_zywall.txt";	
 
 	@Test
 	public void testPriority() {
@@ -27,6 +28,7 @@ public class TestSyslog {
     @Test
 	public void testReadLog() {
 		SyslogFileHandler file = new SyslogFileHandler(LOG_FILENAME);
+		List<SyslogData> syslogDataList = new ArrayList<SyslogData>();
 		try {
 			List<String> data = file.read();
 			for (String dataString : data) {
@@ -81,7 +83,10 @@ public class TestSyslog {
 				syslogData.setMessage(syslogMessage);
 				System.out.println(syslogHeader.getPriority().toString());
 				System.out.println(syslogMessage.toString());
+				syslogDataList.add(syslogData);
 			}
+			
+			assertEquals(16, syslogDataList.size());
 			
 			
 		} catch (FileNotFoundException e) {
