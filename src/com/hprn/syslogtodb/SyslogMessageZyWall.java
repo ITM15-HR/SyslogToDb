@@ -6,7 +6,7 @@ public class SyslogMessageZyWall implements SyslogMessageIF {
 	
 	private String msg;
 	private String[] splittedMsg;
-	private String separator = " ";
+	private String separator = "\" ";
 	
 	public SyslogMessageZyWall(String msg) {
 		setMessage(msg);
@@ -20,7 +20,7 @@ public class SyslogMessageZyWall implements SyslogMessageIF {
 	@Override
 	public void setMessage(String msg) {
 		this.msg = msg;
-		splittedMsg = msg.split(separator);
+		splittedMsg = msg.substring(msg.indexOf(" "), msg.length()).split(separator);
 	}
 
 	@Override
@@ -36,15 +36,8 @@ public class SyslogMessageZyWall implements SyslogMessageIF {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("separator: ").append(separator).append(": [");
-		int counter = 0;
-		for (String string : splittedMsg) {
-			counter++;
-			sb.append(string);
-			if (counter < splittedMsg.length)
-				sb.append(",");
-		}
-		sb.append("]");
+		sb.append("separator: ").append("\n");
+		sb.append("message: ").append(msg);
 		return sb.toString();
 	}
 	

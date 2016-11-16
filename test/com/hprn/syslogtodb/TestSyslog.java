@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
@@ -39,16 +40,22 @@ public class TestSyslog {
 				SyslogMessageIF syslogMessage;
 				
 				int counter = 0;
+				int beginIndex = 0;
+				String msg =  "";
 				StringBuilder sb = new StringBuilder();
 				for (String string : logFileData) {
 					counter++;
-					if (counter > 7)
+					if (counter > 7) {
 						//message
-						if (counter <= logFileData.length)
-							sb.append(string).append(" ");
-						else 
-							sb.append(string);
-					else
+//						if (counter <= logFileData.length)
+//							sb.append(string).append(" ");
+//						else 
+//							sb.append(string);
+						beginIndex += counter;
+						msg = dataString.substring(beginIndex-1, dataString.length());
+						break;
+					} else {
+						beginIndex += string.length();
 						switch(counter) {
 							case 1:
 								int start, end;
@@ -77,12 +84,14 @@ public class TestSyslog {
 								//StructuredData
 								break;
 						}
+					}
 				}
-				syslogMessage = new SyslogMessageZyWall(sb.toString());
+				syslogMessage = new SyslogMessageZyWall(msg);
 				syslogData.setHeader(syslogHeader);
 				syslogData.setMessage(syslogMessage);
-				System.out.println(syslogHeader.getPriority().toString());
-				System.out.println(syslogMessage.toString());
+//				System.out.println(syslogHeader.getPriority().toString());
+//				System.out.println(syslogMessage.toString());
+				System.out.println(Arrays.toString(syslogMessage.messages()));
 				syslogDataList.add(syslogData);
 			}
 			
