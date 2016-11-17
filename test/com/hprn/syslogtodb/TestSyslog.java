@@ -3,8 +3,11 @@ package com.hprn.syslogtodb;
 import static org.junit.Assert.*;
 
 import java.io.FileNotFoundException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
 import org.junit.Test;
@@ -17,7 +20,8 @@ import com.hprn.syslogtodb.model.SyslogPriority;
 
 public class TestSyslog {
 
-	private static final String LOG_FILENAME = "message_example_zywall.txt";	
+	//private static final String LOG_FILENAME = "messages_2016_11_13";
+	private static final String LOG_FILENAME = "messages_example_zywall.txt";
 
 	@Test
 	public void testPriority() {
@@ -29,7 +33,7 @@ public class TestSyslog {
     @Test
 	public void testReadLog() {
 		SyslogFileHandler file = new SyslogFileHandler(LOG_FILENAME);
-		List<SyslogData> syslogDataList = new ArrayList<SyslogData>();
+		ZyWallSyslog zyWallSyslog = new ZyWallSyslog();
 		try {
 			List<String> data = file.read();
 			for (String dataString : data) {
@@ -46,11 +50,6 @@ public class TestSyslog {
 				for (String string : logFileData) {
 					counter++;
 					if (counter > 7) {
-						//message
-//						if (counter <= logFileData.length)
-//							sb.append(string).append(" ");
-//						else 
-//							sb.append(string);
 						beginIndex += counter;
 						msg = dataString.substring(beginIndex-1, dataString.length());
 						break;
@@ -66,7 +65,10 @@ public class TestSyslog {
 								syslogHeader.setVersion(Integer.parseInt(string.substring(end+1, string.length())));
 								break;
 							case 2:
-								//dateTime
+								Calendar cal = Calendar.getInstance();
+								SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+								cal.setTime(sdf.parse(string));
+								syslogHeader.setDateTime(cal);
 								break;
 							case 3:
 								syslogHeader.setHost(string);
@@ -89,16 +91,21 @@ public class TestSyslog {
 				syslogMessage = new SyslogMessageZyWall(msg);
 				syslogData.setHeader(syslogHeader);
 				syslogData.setMessage(syslogMessage);
-//				System.out.println(syslogHeader.getPriority().toString());
-//				System.out.println(syslogMessage.toString());
-				System.out.println(Arrays.toString(syslogMessage.messages()));
-				syslogDataList.add(syslogData);
+				if (((SyslogMessageZyWall) syslogMessage).isExpectedToBeZyWallMsg())
+					zyWallSyslog.add(syslogData);
 			}
 			
-			assertEquals(16, syslogDataList.size());
+			ZyWallSyslog dropped = new ZyWallSyslog();
+			dropped.setData(zyWallSyslog.findDataInMessage("DROP"));
+			for (SyslogData sD : dropped.allData()) {
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+				System.out.println(sdf.format(sD.getHeader().getDateTime().getTime()) + ": " + sD.getMessage().toString());
+			}
+			
+			assertEquals(10, zyWallSyslog.size());
 			
 			
-		} catch (FileNotFoundException e) {
+		} catch (FileNotFoundException | ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

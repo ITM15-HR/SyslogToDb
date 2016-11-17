@@ -7,6 +7,7 @@ public class SyslogMessageZyWall implements SyslogMessageIF {
 	private String msg;
 	private String[] splittedMsg;
 	private String separator = "\" ";
+	private boolean expectedToBeZyWallMsg = true;
 	
 	public SyslogMessageZyWall(String msg) {
 		setMessage(msg);
@@ -20,7 +21,18 @@ public class SyslogMessageZyWall implements SyslogMessageIF {
 	@Override
 	public void setMessage(String msg) {
 		this.msg = msg;
-		splittedMsg = msg.substring(msg.indexOf(" "), msg.length()).split(separator);
+		setMessages(msg);
+	}
+
+	private void setMessages(String msg) {
+		splittedMsg = msg.substring(msg.indexOf(" ") + 1, msg.length()).split(separator);
+		if (splittedMsg.length <= 1)
+			expectedToBeZyWallMsg = false;
+		for (int i = 0; i < splittedMsg.length; i++) {
+			if (splittedMsg[i].lastIndexOf("\"") != splittedMsg[i].length()-1)
+				if (splittedMsg[i].indexOf("\"") > 0)
+					splittedMsg[i] += "\"";
+		}
 	}
 
 	@Override
@@ -31,6 +43,10 @@ public class SyslogMessageZyWall implements SyslogMessageIF {
 	@Override
 	public String[] messages() {
 		return splittedMsg;
+	}
+	
+	public boolean isExpectedToBeZyWallMsg() {
+		return expectedToBeZyWallMsg;
 	}
 
 	@Override
