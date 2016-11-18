@@ -1,7 +1,10 @@
 package com.hprn.syslogtodb;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.hprn.syslogtodb.helper.TimeInterval;
 import com.hprn.syslogtodb.model.SyslogData;
@@ -9,6 +12,7 @@ import com.hprn.syslogtodb.model.SyslogData;
 public class ZyWallSyslog {
 	
 	private List<SyslogData> data = new ArrayList<SyslogData>(); 
+	private Map<Calendar,Integer> statistic = new HashMap<Calendar,Integer>();
 
 	public void add(SyslogData syslogData) {
 		if (syslogData == null)
@@ -56,35 +60,97 @@ public class ZyWallSyslog {
 	public int countPer(TimeInterval timeInterval) {
 		switch (timeInterval) {
 			case SECOND:
-				return countBySecond();
+				countBySecond();
+				break;
 			case MINUTE:
-				return countByMinute();
+				countByMinute();
+				break;
 			case HOUR:
-				return countByHour();
+				countByHour();
+				break;
 			case DAY:
-				return countByDay();
+				countByDay();
+				break;
 		}
 		return 0;
 	}
 
-	private int countBySecond() {
-		// TODO Auto-generated method stub
-		return 0;
+	private void countBySecond() {
+		statistic.clear();
+		Calendar theDay = Calendar.getInstance();
+		for (SyslogData syslogData : data) {
+			int day, month, year, hour, minute, second;
+			day = syslogData.getHeader().getDateTime().getTime().getDate();
+			month = syslogData.getHeader().getDateTime().getTime().getMonth();
+			year = syslogData.getHeader().getDateTime().getTime().getYear();
+			hour = syslogData.getHeader().getDateTime().getTime().getHours();
+			minute = syslogData.getHeader().getDateTime().getTime().getMinutes();
+			second = syslogData.getHeader().getDateTime().getTime().getSeconds();
+			theDay.set(year,  month, day, hour, minute, second);
+			if (!statistic.containsKey(theDay)) {
+				statistic.put(theDay, 1);
+			} else {
+				statistic.put(theDay, statistic.get(theDay) + 1);
+			}
+		}
+		System.out.println(statistic.size());
 	}
 
-	private int countByMinute() {
-		// TODO Auto-generated method stub
-		return 0;
+	private void countByMinute() {
+		statistic.clear();
+		Calendar theDay = Calendar.getInstance();
+		for (SyslogData syslogData : data) {
+			int day, month, year, hour, minute;
+			day = syslogData.getHeader().getDateTime().getTime().getDate();
+			month = syslogData.getHeader().getDateTime().getTime().getMonth();
+			year = syslogData.getHeader().getDateTime().getTime().getYear();
+			hour = syslogData.getHeader().getDateTime().getTime().getHours();
+			minute = syslogData.getHeader().getDateTime().getTime().getMinutes();
+			theDay.set(year,  month, day, hour, minute, 0);
+			if (!statistic.containsKey(theDay)) {
+				statistic.put(theDay, 1);
+			} else {
+				statistic.put(theDay, statistic.get(theDay) + 1);
+			}
+		}
+		System.out.println(statistic.size());
 	}
 
-	private int countByHour() {
-		// TODO Auto-generated method stub
-		return 0;
+	private void countByHour() {
+		statistic.clear();
+		Calendar theDay = Calendar.getInstance();
+		for (SyslogData syslogData : data) {
+			int day, month, year, hour;
+			day = syslogData.getHeader().getDateTime().getTime().getDate();
+			month = syslogData.getHeader().getDateTime().getTime().getMonth();
+			year = syslogData.getHeader().getDateTime().getTime().getYear();
+			hour = syslogData.getHeader().getDateTime().getTime().getHours();
+			theDay.set(year,  month, day, hour, 0, 0);
+			if (!statistic.containsKey(theDay)) {
+				statistic.put(theDay, 1);
+			} else {
+				statistic.put(theDay, statistic.get(theDay) + 1);
+			}
+		}
+		System.out.println(statistic.size());
 	}
 
-	private int countByDay() {
-		// TODO Auto-generated method stub
-		return 0;
+	private void countByDay() {
+		statistic.clear();
+		Calendar theDay = Calendar.getInstance();
+		for (SyslogData syslogData : data) {
+			int day, month, year;
+			day = syslogData.getHeader().getDateTime().getTime().getDate();
+			month = syslogData.getHeader().getDateTime().getTime().getMonth();
+			year = syslogData.getHeader().getDateTime().getTime().getYear();
+			theDay.set(year,  month, day);
+			if (!statistic.containsKey(theDay)) {
+				statistic.put(theDay, 1);
+			} else {
+				statistic.put(theDay, statistic.get(theDay) + 1);
+			}
+		}
+		System.out.println(statistic.size());
 	}
 
 }

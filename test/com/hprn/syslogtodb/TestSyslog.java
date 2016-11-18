@@ -5,14 +5,13 @@ import static org.junit.Assert.*;
 import java.io.FileNotFoundException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
 import org.junit.Test;
 
 import com.hprn.syslogtodb.handler.SyslogFileHandler;
+import com.hprn.syslogtodb.helper.TimeInterval;
 import com.hprn.syslogtodb.model.SyslogData;
 import com.hprn.syslogtodb.model.SyslogHeader;
 import com.hprn.syslogtodb.model.SyslogMessageIF;
@@ -101,7 +100,7 @@ public class TestSyslog {
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
 				System.out.println(sdf.format(sD.getHeader().getDateTime().getTime()) + ": " + sD.getMessage().toString());
 			}
-			
+			zyWallSyslog.countPer(TimeInterval.SECOND);
 			assertEquals(10, zyWallSyslog.size());
 			
 			
