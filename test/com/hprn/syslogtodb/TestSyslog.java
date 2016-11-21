@@ -11,6 +11,7 @@ import java.util.List;
 import org.junit.Test;
 
 import com.hprn.syslogtodb.handler.SyslogFileHandler;
+import com.hprn.syslogtodb.helper.ExportType;
 import com.hprn.syslogtodb.helper.TimeInterval;
 import com.hprn.syslogtodb.model.SyslogData;
 import com.hprn.syslogtodb.model.SyslogHeader;
@@ -101,6 +102,16 @@ public class TestSyslog {
 				System.out.println(sdf.format(sD.getHeader().getDateTime().getTime()) + ": " + sD.getMessage().toString());
 			}
 			zyWallSyslog.countPer(TimeInterval.SECOND);
+			System.out.println(zyWallSyslog.exportStatistic(ExportType.CSV));
+			
+			zyWallSyslog.countPer(TimeInterval.MINUTE);
+			System.out.println(zyWallSyslog.exportStatistic(ExportType.XML));
+			
+			zyWallSyslog.countPer(TimeInterval.HOUR);
+			System.out.println(zyWallSyslog.exportStatistic(ExportType.CSV));
+			
+			zyWallSyslog.countPer(TimeInterval.DAY);
+			System.out.println(zyWallSyslog.exportStatistic(ExportType.JSON));
 			assertEquals(10, zyWallSyslog.size());
 			
 			
