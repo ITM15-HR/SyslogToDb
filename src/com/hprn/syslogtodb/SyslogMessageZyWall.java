@@ -40,7 +40,6 @@ public class SyslogMessageZyWall implements SyslogMessageIF {
 		return msg;
 	}
 
-	@Override
 	public String[] messages() {
 		return splittedMsg;
 	}

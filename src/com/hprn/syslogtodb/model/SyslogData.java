@@ -1,7 +1,5 @@
 package com.hprn.syslogtodb.model;
 
-import java.util.Calendar;
-
 public class SyslogData {
 	
 	private static final String NILVALUE = "-";

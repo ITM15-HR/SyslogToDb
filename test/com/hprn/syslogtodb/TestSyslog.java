@@ -31,94 +31,96 @@ public class TestSyslog {
 	}
 	
     @Test
-	public void testReadLog() {
-		SyslogFileHandler file = new SyslogFileHandler(LOG_FILENAME);
-		ZyWallSyslog zyWallSyslog = new ZyWallSyslog();
-		try {
-			List<String> data = file.read();
-			for (String dataString : data) {
-				String[] logFileData = dataString.split(" ");
-				SyslogData syslogData = new SyslogData();
-				SyslogHeader syslogHeader = new SyslogHeader();
-				//SyslogStructuredData syslogStructuredData = new SyslogStructuredData();
-				SyslogMessageIF syslogMessage;
-				
-				int counter = 0;
-				int beginIndex = 0;
-				String msg =  "";
-				StringBuilder sb = new StringBuilder();
-				for (String string : logFileData) {
-					counter++;
-					if (counter > 7) {
-						beginIndex += counter;
-						msg = dataString.substring(beginIndex-1, dataString.length());
-						break;
-					} else {
-						beginIndex += string.length();
-						switch(counter) {
-							case 1:
-								int start, end;
-								start = string.indexOf("<");
-								end = string.indexOf(">");
-								SyslogPriority prio = new SyslogPriority(Integer.parseInt(string.substring(start+1, end)));
-								syslogHeader.setPriority(prio);
-								syslogHeader.setVersion(Integer.parseInt(string.substring(end+1, string.length())));
-								break;
-							case 2:
-								Calendar cal = Calendar.getInstance();
-								SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
-								cal.setTime(sdf.parse(string));
-								syslogHeader.setDateTime(cal);
-								break;
-							case 3:
-								syslogHeader.setHost(string);
-								break;
-							case 4:
-								syslogHeader.setAppName(string);
-								break;
-							case 5:
-								syslogHeader.setProcid(string);
-								break;
-							case 6: 
-								syslogHeader.setMsgid(string);
-								break;
-							case 7:
-								//StructuredData
-								break;
-						}
-					}
-				}
-				syslogMessage = new SyslogMessageZyWall(msg);
-				syslogData.setHeader(syslogHeader);
-				syslogData.setMessage(syslogMessage);
-				if (((SyslogMessageZyWall) syslogMessage).isExpectedToBeZyWallMsg())
-					zyWallSyslog.add(syslogData);
-			}
-			
-			ZyWallSyslog dropped = new ZyWallSyslog();
-			dropped.setData(zyWallSyslog.findDataInMessage("DROP"));
-			for (SyslogData sD : dropped.allData()) {
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
-				System.out.println(sdf.format(sD.getHeader().getDateTime().getTime()) + ": " + sD.getMessage().toString());
-			}
-			zyWallSyslog.countPer(TimeInterval.SECOND);
-			System.out.println(zyWallSyslog.exportStatistic(ExportType.CSV));
-			
-			zyWallSyslog.countPer(TimeInterval.MINUTE);
-			System.out.println(zyWallSyslog.exportStatistic(ExportType.XML));
-			
-			zyWallSyslog.countPer(TimeInterval.HOUR);
-			System.out.println(zyWallSyslog.exportStatistic(ExportType.CSV));
-			
-			zyWallSyslog.countPer(TimeInterval.DAY);
-			System.out.println(zyWallSyslog.exportStatistic(ExportType.JSON));
-			assertEquals(10, zyWallSyslog.size());
-			
-			
-		} catch (FileNotFoundException | ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+    public void testZyWallSyslog() {
+    	ZyWallSyslog syslog = new ZyWallSyslog();
+    	syslog.read(LOG_FILENAME);
+    	assertEquals(10, syslog.size());
+    }
+    
+    @Test
+    public void testZyWallSyslogFilter() {
+    	ZyWallSyslog syslog = new ZyWallSyslog();
+    	syslog.read(LOG_FILENAME);
+    	ZyWallSyslog dropped = new ZyWallSyslog();
+		dropped.setData(syslog.findDataInMessage("DROP"));
+		assertEquals(2, dropped.size());
+    }
+    
+    @Test
+    public void testZyWallSyslogStatisticPerSecond() {
+    	ZyWallSyslog syslog = new ZyWallSyslog();
+    	syslog.read(LOG_FILENAME);
+    	assertEquals(8, syslog.countPer(TimeInterval.SECOND));
+    }
+    
+    @Test
+    public void testZyWallSyslogStatisticPerMinute() {
+    	ZyWallSyslog syslog = new ZyWallSyslog();
+    	syslog.read(LOG_FILENAME);
+    	assertEquals(5, syslog.countPer(TimeInterval.MINUTE));
+    }
+    
+    @Test
+    public void testZyWallSyslogStatisticPerHour() {
+    	ZyWallSyslog syslog = new ZyWallSyslog();
+    	syslog.read(LOG_FILENAME);
+    	assertEquals(4, syslog.countPer(TimeInterval.HOUR));
+    }
+    
+    @Test
+    public void testZyWallSyslogStatisticPerDay() {
+    	ZyWallSyslog syslog = new ZyWallSyslog();
+    	syslog.read(LOG_FILENAME);
+    	assertEquals(3, syslog.countPer(TimeInterval.DAY));
+    }
+    
+    @Test
+    public void testZyWallSyslogStatisticPerDayAsCSV() {
+    	String result = "2016-10-11T00:00:00+02:00;2\n"+
+    			"2016-10-12T00:00:00+02:00;5\n"+
+    			"2016-10-10T00:00:00+02:00;3";
+    	ZyWallSyslog syslog = new ZyWallSyslog();
+    	syslog.read(LOG_FILENAME);
+    	syslog.countPer(TimeInterval.DAY);
+    	String str = syslog.exportStatistic(ExportType.CSV);
+    	assertEquals(result, str);
+    }
+    
+    @Test
+    public void testZyWallSyslogStatisticPerDayAsXML() {
+    	String result = "<statistics>\n"+
+				"	<statistic>\n"+
+				"		<date>2016-10-11T00:00:00+02:00</date>\n"+
+				"		<value>2</value>\n"+
+				"	</statistic>\n"+
+				"	<statistic>\n"+
+				"		<date>2016-10-12T00:00:00+02:00</date>\n"+
+				"		<value>5</value>\n"+
+				"	</statistic>\n"+
+				"	<statistic>\n"+
+				"		<date>2016-10-10T00:00:00+02:00</date>\n"+
+				"		<value>3</value>\n"+
+				"	</statistic>\n"+
+				"</statistics>";
+    	ZyWallSyslog syslog = new ZyWallSyslog();
+    	syslog.read(LOG_FILENAME);
+    	syslog.countPer(TimeInterval.DAY);
+    	String str = syslog.exportStatistic(ExportType.XML);
+    	assertEquals(result, str);
+    }
+    
+    @Test
+    public void testZyWallSyslogStatisticPerDayAsJSON() {
+    	String result = "{\"statistics\":[\n"+
+				"\t{\"date\":\"2016-10-11T00:00:00+02:00\",\"value\":2},\n"+
+				"\t{\"date\":\"2016-10-12T00:00:00+02:00\",\"value\":5},\n"+
+				"\t{\"date\":\"2016-10-10T00:00:00+02:00\",\"value\":3}\n"+
+				"]}";
+    	ZyWallSyslog syslog = new ZyWallSyslog();
+    	syslog.read(LOG_FILENAME);
+    	syslog.countPer(TimeInterval.DAY);
+    	String str = syslog.exportStatistic(ExportType.JSON);
+    	assertEquals(result, str);
+    }
 	
 }
